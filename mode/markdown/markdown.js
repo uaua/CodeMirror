@@ -205,9 +205,9 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       return tokenTypes.code;
     } else if (stream.eatSpace()) {
       return null;
-    } else if (firstTokenOnLine && state.indentation <= maxNonCodeIndentation && (match = stream.match(atxHeaderRE)) && match[1].length <= 6) {
+    } else if (firstTokenOnLine && state.indentation <= maxNonCodeIndentation && (match = stream.match(atxHeaderRE)) && match[1].length <= 5) {
       state.quote = 0;
-      state.header = match[1].length;
+      state.header = match[1].length + 1;
       state.thisLine.header = true;
       if (modeCfg.highlightFormatting) state.formatting = "header";
       state.f = state.inline;
@@ -348,10 +348,14 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
 
     if (state.taskOpen) {
       styles.push("meta");
+      styles.push("task-" + state.taskCnt++);
+      styles.push("task-line-" + state.thisLine.stream.lineOracle.line);
       return styles.length ? styles.join(' ') : null;
     }
     if (state.taskClosed) {
       styles.push("property");
+      styles.push("task-" + state.taskCnt++);
+      styles.push("task-line-" + state.thisLine.stream.lineOracle.line);
       return styles.length ? styles.join(' ') : null;
     }
 
@@ -744,6 +748,8 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
       return {
         f: blockNormal,
 
+        taskCnt: 0,
+
         prevLine: {stream: null},
         thisLine: {stream: null},
 
@@ -779,6 +785,8 @@ CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
     copyState: function(s) {
       return {
         f: s.f,
+
+        taskCnt: 0,
 
         prevLine: s.prevLine,
         thisLine: s.thisLine,
